@@ -1,0 +1,183 @@
+<template>
+  <div class="tables-basic">
+    <b-row>
+      <b-col cols="9">
+        <h2 class="page-title">
+          <span>Source Types</span>
+        </h2>
+        <p>
+          Source types are used to assign configurations like timestamp
+          recognition, event breaking, and field extractions to data indexed by
+          VSIEM
+        </p>
+      </b-col>
+
+      <b-col>
+        <!--Nếu yêu cầu 2 button sau thì tạo 2 modal tương ứng.-->
+        <div style="float: right; min-width: 100px">
+          <b-button
+            v-b-modal.source_type
+            variant="default"
+            style="min-width: 100px"
+            >New Source Type</b-button
+          >
+          <NewSourceType />
+        </div>
+      </b-col>
+    </b-row>
+
+    <v-card style="background-color: transparent">
+      <Widget>
+        <v-card-title style="height: 70px">
+          <b-row>
+            <b-col cols="5" xs="auto" lg="auto" md="auto">
+              <b-dropdown
+                text="Category: All"
+                ref="Category"
+                variant="default"
+                style="color: white"
+              >
+                <b-dropdown-item
+                  v-for="category in Categories"
+                  :key="category.text"
+                  v-on:click="changeItem('Category', category.text)"
+                  >{{ category.text }}</b-dropdown-item
+                >
+              </b-dropdown>
+              <!--Application-->
+              <b-dropdown
+                text="App: All"
+                ref="App"
+                variant="default"
+                style="color: white; margin-left: 10px"
+              >
+                <b-dropdown-item
+                  v-for="app in Apps"
+                  :key="app.text"
+                  v-on:click="changeItem('App', app.text)"
+                >
+                  {{ app.text }}
+                </b-dropdown-item>
+              </b-dropdown>
+            </b-col>
+            <b-col cols="3"
+              ><div>
+                <v-text-field
+                  style="width: 80%; min-width: 200px"
+                  :dark="true"
+                  v-model="search"
+                  append-icon="mdi-magnify"
+                  placeholder="filter"
+                  outlined
+                  dense
+                ></v-text-field></div
+            ></b-col>
+
+            <b-col>
+              <div style="float: right">
+                <b-dropdown
+                  style="color: #a6a9c3"
+                  :text="itemsPerPage"
+                  ref="Page"
+                  variant="default"
+                >
+                  <b-dropdown-item
+                    v-for="pageItem in pageItems"
+                    :key="pageItem.text"
+                    v-on:click="changeItem('Page', pageItem.text)"
+                    >{{ pageItem.text }}</b-dropdown-item
+                  >
+                </b-dropdown>
+              </div>
+            </b-col>
+          </b-row>
+        </v-card-title>
+
+        <b-row>
+          <b-col>
+            <div style="float: right; margin-right: 15px">
+              <b-pagination
+                v-model="page"
+                :total-rows="totalRecords"
+                :per-page="itemsPerPage"
+              ></b-pagination>
+            </div>
+          </b-col>
+        </b-row>
+
+        <DataTable
+          :_search="search"
+          :headers="headers"
+          :records="records"
+          :page="page"
+          :itemsPerPage="parseInt(itemsPerPage)"
+        ></DataTable>
+      </Widget>
+    </v-card>
+    
+  </div>
+</template>
+
+<script>
+import Widget from "@/components/Widget/Widget";
+import NewSourceType from "./NewSourceType";
+import DataTable from "@/components/DataTables/DataTable";
+
+export default {
+  name: "Tables",
+  components: { DataTable, Widget, NewSourceType },
+
+  data() {
+    return {
+      // Categories
+      Categories: [
+        //{ text: "Category: All" },
+        { text: "Application" },
+        { text: "Custom" },
+        { text: "Database" },
+      ],
+
+      Apps: [
+        //{ text: "App: All" },
+        { text: "V-ES" },
+        { text: "Enterprise Security" },
+        { text: "Application" },
+      ],
+
+      page: 1,
+      totalRecords: 20,
+      itemsPerPage: "10 per page",
+      search: "",
+      selected: [],
+
+      pageItems: [
+        { value: 5, text: "5 per page" },
+        { value: 10, text: "10 per page" },
+        { value: 15, text: "15 per page" },
+      ],
+      headers: [
+        { text: "Name", value: "name" },
+        { text: "Action", value: "action" },
+        { text: "Category", value: "category" },
+        { text: "App", value: "app" },
+      ],
+      records: [
+        {
+          name: "Name",
+          category: "Structured",
+          app: "V-ES",
+        },
+      ],
+    };
+  },
+  methods: {
+    changeItem: function (refName, item) {
+      if (refName != "Page") {
+        this.$refs[refName].text = item;
+      } else {
+        this.itemsPerPage = item;
+      }
+    },
+  },
+};
+</script>
